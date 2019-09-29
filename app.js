@@ -89,7 +89,7 @@ function start() {
             // url:'https://ip.cn'
         }, () => {
             setCsrf()
-            i++;
+            
             req({
                 url: 'https://www.instagram.com/accounts/login/ajax/',
                 method: 'post',
@@ -116,7 +116,9 @@ function start() {
                     console.log(`${ins[i][0]}登陆失败!`)
                     _deep()
                 }
+                i++;
             }).catch(err=>{
+                i++;
                 _deep()
             })
         })
