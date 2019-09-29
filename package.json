@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "lodash": "^4.17.15",
+    "node-xlsx": "^0.15.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
+    "socks5-https-client": "^1.2.1"
+  }
+}
