@@ -7,6 +7,10 @@ var xl = new Xlsx(path.join(__dirname, './output_ca_0906_bak.xlsx'))
 
 var j;
 
+
+xl.find({ disable: 2 }).map(it => {
+    xl.updateOne({ disable: 2 }, { disable: '' })
+})
 var defaultHeaders = {
     "x-instagram-ajax": "14d008e2bc7b",
 };
@@ -65,8 +69,8 @@ function start() {
 
     let _deep = function () {
         if (i >= ins.length) {
-            console.log('结束')
-            return start();
+            console.log('账号登陆完毕')
+            return ;
         };
         j = request.jar()
 
@@ -77,7 +81,7 @@ function start() {
             agentClass: Agent,
             strictSSL: true,
             agentOptions: {
-                socksHost: '54.67.106.74',
+                socksHost: '54.153.74.157',
                 socksPort: 8808
             },
             headers: defaultHeaders
@@ -89,6 +93,9 @@ function start() {
             // url:'https://ip.cn'
         }, () => {
             setCsrf()
+            if(!ins[i]) return ;
+            let username  = ins[i][0];
+            let password = ins[i][1];
             
             req({
                 url: 'https://www.instagram.com/accounts/login/ajax/',
@@ -97,8 +104,8 @@ function start() {
                     "content-type": "application/x-www-form-urlencoded"
                 },
                 form: {
-                    username: ins[i][0],
-                    password: ins[i][1],
+                    username: username,
+                    password: password,
                     // username: '632598678@qq.com',
                     // password: 'a18655556615',
                     enc_password: '',
@@ -108,16 +115,17 @@ function start() {
             }).then((body) => {
                 body = JSON.parse(body)
                 if (body.authenticated) {
-                    console.log(`${ins[i][0]}登陆成功!`)
-                    console.log(`当前登陆账号数:${i+1}个`)
+                    console.log(`${username}登陆成功!`)
+                    console.log(`当前登陆账号数:${i + 1}个`)
                     _deep()
                     searchStart(req)
                 } else {
-                    console.log(`${ins[i][0]}登陆失败!`)
+                    console.log(`${username}登陆失败!`)
                     _deep()
                 }
                 i++;
-            }).catch(err=>{
+            }).catch(err => {
+                console.log('登陆失败')
                 i++;
                 _deep()
             })
