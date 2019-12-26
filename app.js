@@ -3,7 +3,7 @@ var users = require('./users')
 var path = require('path')
 var Agent = require('socks5-https-client/lib/Agent');
 var Xlsx = require('./utils/xlsx.util')
-var xl = new Xlsx(path.join(__dirname, './output_ca_0906_bak.xlsx'))
+var xl = new Xlsx(path.join(__dirname, './output1226.xlsx'))
 
 var j;
 
@@ -13,49 +13,24 @@ xl.find({ disable: 2 }).map(it => {
 })
 var defaultHeaders = {
     "x-instagram-ajax": "14d008e2bc7b",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
 };
 
 var ins = [
-    ["airmanicuredVunouf", "aicruVmouranfuedni"],
-    ["quincetop", "ecniuotqp448303"],
-    ["shiversomber", "esemhbirvros588300"],
-    ["moverragged", "moverragged547235"],
-    ["showamused", "shmadswoeu525977"],
-    ["remakedigestive", "eimeiedkregtvsa457689"],
-    ["advocateporous", "oraapedusctoov488297"],
-    ["coonbeloved", "clebeodvnoo553420"],
-    ["tequilacovered", "rcdtleqvaueieo054218"],
-    ["dimefeudal", "fdeimadleu157100"],
-    ["oafpackaged", "pfakacgaode187257"],
-    ["yawnadoptive", "ovpidyawnate017103"],
-    ["radicalwarped", "idpalrarwceda932269"],
-    ["windpaved", "pwnidveda364539"],
-    ["scabouter", "ecaubtsor848052"],
-    ["salaryovert", "aorvelsatyr044925"],
-    ["sewerleveraged", "sewgeevrleerad105473"],
-    ["fatigueshaken", "sugitaekfhean939549"],
-    ["duoreputed", "uporetdued170874"],
-    ["hikerfrozen", "fhreoernzik742782"],
-    ["tutorhumorous", "ruuouoromtths494388"],
-    ["chimerabroke", "achbirmoekre285395"]
+    ["mortalconscientiousOivauc", "trtomuvesiOincicauosnocal"],
+    ["runereformistIanehucux", "recotexhunurrsInfaeumi"],
+    ["summarysmokelessUkomashu", "yaUkeloasemomrmmsuukshss"],
+    ["leavingconspicuousRoki", "vaisokicipseluguoonncR"],
+    ["welterweightsharpOjob", "ewprjeotghsitrlawheOb"],
+    ["thermostatkindlyIssaapu", "ydataplnoutItisrmashesk"],
+    ["prognosisraisedEtrakiup", "ppooiisnksrgutiEraaersd"],
+    ["footingmanipulativePrukeskemi", "opltveiiakiseonftnmugmrPiaeuk"],
+    ["hospitaltediousJelig", "puiislogotsihaJldeet"],
+    ["snowshoedwindlingOasceduvo", "iwssuovOohdncnenlddgeiaswo"],
+    ["reincarnationricketyGratiusuwi", "receiaitnrttGuyncsnikriiraaouw"]
 ];
 
-/**
- * 
- * @param {数组} arr 
- * @param {*} cb 
- */
-function forNext(arr, cb, done) {
-    let i = 0;
-    let _deep = function () {
-        if (i >= arr.length) return done();
-        cb(arr[i], i, function () {
-            i++;
-            _deep()
-        })
-    }
-    _deep()
-}
+
 
 function setCsrf() {
     var cookies = j._jar.toJSON().cookies;
@@ -66,11 +41,12 @@ function setCsrf() {
 
 function start() {
     let i = 0;
+    let userNum = 0;
 
     let _deep = function () {
         if (i >= ins.length) {
             console.log('账号登陆完毕')
-            return ;
+            return;
         };
         j = request.jar()
 
@@ -81,7 +57,7 @@ function start() {
             agentClass: Agent,
             strictSSL: true,
             agentOptions: {
-                socksHost: '54.153.74.157',
+                socksHost: '35.158.221.84',
                 socksPort: 8808
             },
             headers: defaultHeaders
@@ -90,13 +66,13 @@ function start() {
 
         req({
             url: 'https://www.instagram.com/accounts/login/?source=auth_switcher',
-            // url:'https://ip.cn'
-        }, () => {
+            // url:'https://baidu.com'
+        }, (err,res,body) => {
             setCsrf()
-            if(!ins[i]) return ;
-            let username  = ins[i][0];
+            if (!ins[i]) return;
+            let username = ins[i][0];
             let password = ins[i][1];
-            
+
             req({
                 url: 'https://www.instagram.com/accounts/login/ajax/',
                 method: 'post',
@@ -116,9 +92,10 @@ function start() {
                 body = JSON.parse(body)
                 if (body.authenticated) {
                     console.log(`${username}登陆成功!`)
-                    console.log(`当前登陆账号数:${i + 1}个`)
-                    _deep()
+                    userNum++
+                    console.log(`当前登陆账号数:${userNum}个`)
                     searchStart(req)
+                    _deep()
                 } else {
                     console.log(`${username}登陆失败!`)
                     _deep()
@@ -137,10 +114,32 @@ function start() {
 
 start()
 
+
+/**
+ * 
+ * @param {数组} arr 
+ * @param {Function} cb 
+ * @param {Function} done 完成回调
+ */
+function forNext(arr, cb, done) {
+    let i = 0;
+    let _deep = function () {
+        if (i >= arr.length) return done();
+        cb(arr[i], i, function () {
+            i++;
+            Promise.resolve().then(() => {
+                _deep()
+            })
+        })
+    }
+    _deep()
+}
+
 function searchStart(req) {
     forNext(xl.list, function (it, idx, next) {
         if (it.disable == 0 || it.disable == 1 || it.disable == 2) {
-            return next();
+            next()
+            return;
         }
         xl.updateOne({ username: it.username }, { disable: 2 })
         req({

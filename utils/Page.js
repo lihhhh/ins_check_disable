@@ -9,10 +9,8 @@ const { parse } = require('useragent');
 const devices = require('../libs/DeviceDescriptors');
 const prettier = require("prettier");
 
-const moment = require("moment");
-const aws = require('../aws_libs/index')
 
-global.INSTANCES_ERR = {};
+
 
 module.exports = class {
     constructor(parentThis) {
@@ -100,37 +98,10 @@ module.exports = class {
             var now_url = await this.page.url()
 
             if (/challenge/.test(now_url)) {
-                if (global.INSTANCES_ERR[this.data.INSTANCE_ID]) {
-                    let insErrList = global.INSTANCES_ERR[this.data.INSTANCE_ID];
-
-                    if (!(insErrList.some(it => it.username == this.data.username))) {
-                        insErrList.push({
-                            username: this.data.username,
-                            challengeTime: moment()
-                        })
-
-
-                        insErrList = insErrList.filter(it => it.challengeTime.isAfter(moment().add(-5, 'm')))
-
-                        this.logger('info',`当前错误个数 ${insErrList.length}个`)
-                        if (insErrList.length > 2) {
-                            this.logger('info','停止实例')
-                            this.xlsx.find({ INSTANCE_ID: this.data.INSTANCE_ID }).forEach(it => {
-                                this.xlsx.updateOne({ username: this.data.username }, {
-                                    INSTANCE_ID: '',//清空实例绑定
-                                    wakeUpTime: moment().add(global.CONF.verify_sleep_time, 'minute').format('YYYY-MM-DD HH:mm:ss')
-                                })
-                            })
-                            new aws.Aws(this.data.INSTANCE_ID).stopInstance()
-                        }
-                    }
-                } else {
-                    global.INSTANCES_ERR[this.data.INSTANCE_ID] = [];
-                    global.INSTANCES_ERR[this.data.INSTANCE_ID].push({
-                        username: this.data.username,
-                        challengeTime: moment()
-                    })
-                }
+                this.addUserError({
+                    INSTANCE_ID:this.data.INSTANCE_ID,
+                    username: this.data.username
+                })
 
 
                 let err = '';
