@@ -141,18 +141,15 @@ async function login(ig, user, update) {
     }
 }
 
-var j = 0;
-
 function getTasks(num = 60) {
     let out = [];
     for (let i = 0; i < xl.list.length; i++) {
-        j++;
-        console.log(`正在查询 ${j}----总 ${xl.list.length}`)
         if (out.length == num) {
             return out;
         }
         if (!xl.list[i].runStatus) {
             xl.list[i].runStatus = "2";
+            xl.list[i].idx = i;
             out.push(xl.list[i])
         }
     }
@@ -170,7 +167,8 @@ async function start(user) {
     }
 
     let q = async.queue(async (it) => {
-
+        console.log(`正在查询 ${it.idx}----总 ${xl.list.length}`)
+        delete it.idx;
         let userData = await ig.user.searchExact(it.username)
         let info = await ig.user.info(userData.pk)
 
