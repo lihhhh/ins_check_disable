@@ -11,7 +11,11 @@ const users = require('./users.json')
 const async = require('async')
 const request = require('request-promise')
 
-xl.list.map(it => it.runStatus = '')
+xl.list.map(it => {
+    if (it.runStatus == "2") {
+        it.runStatus = '';
+    }
+})
 
 
 var defaultHeaders = {
@@ -48,11 +52,20 @@ function fakeLoad(username) {
 async function login(ig, user, update) {
     let _j = request.jar()
 
-    let proxy = await request({
-        url: "http://proxy.12306gogohoho.com:2000/v1/proxy?region=ap-southeast-2",
-        json: true,
-        timeout: 120 * 1000
-    })
+    let proxy;
+    try {
+        proxy = await request({
+            url: "http://127.0.0.1:1088/v1/proxy?region=ap-southeast-2",
+            json: true,
+            timeout: 120 * 1000
+        })
+    } catch (err) {
+        proxy = await request({
+            url: "http://127.0.0.1:1088/v1/proxy?region=ap-southeast-2",
+            json: true,
+            timeout: 120 * 1000
+        })
+    }
 
     let agentOptions = {
         socksHost: proxy.result[0].ss_ip,
@@ -128,9 +141,13 @@ async function login(ig, user, update) {
     }
 }
 
+var j = 0;
+
 function getTasks(num = 60) {
     let out = [];
     for (let i = 0; i < xl.list.length; i++) {
+        j++;
+        console.log(`正在查询 ${j}----总 ${xl.list.length}`)
         if (out.length == num) {
             return out;
         }
@@ -142,7 +159,7 @@ function getTasks(num = 60) {
     return out;
 }
 
-var i = 0;
+
 
 async function start(user) {
     const ig = new IgApiClient();
@@ -153,8 +170,7 @@ async function start(user) {
     }
 
     let q = async.queue(async (it) => {
-        i++;
-        console.log(`正在查询 ${i}----总 ${xl.list.length}`)
+
         let userData = await ig.user.searchExact(it.username)
         let info = await ig.user.info(userData.pk)
 
@@ -167,7 +183,7 @@ async function start(user) {
             public_phone_country_code: info.public_phone_country_code,
             public_phone_number: info.public_phone_number,
             public_email: info.public_email,
-            runStatus:1
+            runStatus: 1
         })
     }, 5)
 
